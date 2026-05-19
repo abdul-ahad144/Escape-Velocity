@@ -4,21 +4,24 @@ import streamlit.components.v1 as components
 # --------------------------------
 # PAGE
 # --------------------------------
-st.set_page_config(page_title="Escape Velocity Visualisation", layout="wide")
+st.set_page_config(page_title="Escape Velocity", layout="wide")
 
-st.title("🌍 Escape Velocity Visualisation")
+st.title("🌍🚀 Escape Velocity Visualisation")
 
 st.write("""
-Earth ki gravity se bahar nikalne ke liye object ko minimum speed chahiye hoti hai.
-Usko Escape Velocity kehte hain.
+Ball Earth se launch hogi aur space ki taraf jayegi.
+Agar velocity kam hui to wapas gir jayegi.
 """)
 
 # --------------------------------
 # SLIDERS
 # --------------------------------
-mass = st.sidebar.slider("Ball Mass (kg)", 1, 100, 10)
-
-velocity = st.sidebar.slider("Launch Velocity (km/s)", 1.0, 15.0, 5.0)
+velocity = st.sidebar.slider(
+    "Launch Velocity (km/s)",
+    1.0,
+    15.0,
+    8.0
+)
 
 # --------------------------------
 # ESCAPE VELOCITY
@@ -27,32 +30,32 @@ escape_velocity = 11.2
 
 st.latex(r"v_e = \sqrt{\frac{2GM}{R}}")
 
-st.subheader(f"Earth Escape Velocity = {escape_velocity} km/s")
+st.subheader(f"Escape Velocity = {escape_velocity} km/s")
 
 st.subheader(f"Current Velocity = {velocity} km/s")
 
 # --------------------------------
 # STATUS
 # --------------------------------
-if velocity < escape_velocity:
-    status = "❌ Ball Falls Back To Earth"
+escaped = velocity >= escape_velocity
+
+if escaped:
+    st.success("🚀 Ball Escaped Earth Gravity")
 else:
-    status = "🚀 Ball Escapes Earth Gravity"
-
-st.success(status)
+    st.error("🌍 Gravity Pulled Ball Back")
 
 # --------------------------------
-# ANIMATION SPEED
+# SPEED
 # --------------------------------
-animation_speed = max(2, 12 - velocity)
+animation_speed = max(2, 10 - velocity / 2)
 
 # --------------------------------
-# ESCAPE HEIGHT
+# MOVEMENT
 # --------------------------------
-if velocity < escape_velocity:
-    top_position = "35%"
+if escaped:
+    final_position = "110%"
 else:
-    top_position = "-120px"
+    final_position = "55%"
 
 # --------------------------------
 # HTML
@@ -68,47 +71,16 @@ html_code = f"""
 body {{
     margin:0;
     overflow:hidden;
+    background:black;
 }}
 
 .container {{
     position:relative;
     width:100%;
-    height:500px;
-    background:black;
+    height:600px;
     overflow:hidden;
     border-radius:20px;
-}}
-
-.earth {{
-    position:absolute;
-    bottom:-180px;
-    left:50%;
-    transform:translateX(-50%);
-    width:500px;
-    height:500px;
-    background:radial-gradient(circle, #2ecc71, #145a32);
-    border-radius:50%;
-}}
-
-.ball {{
-    position:absolute;
-    bottom:140px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:50px;
-
-    animation: launch {animation_speed}s linear forwards;
-}}
-
-@keyframes launch {{
-
-    from {{
-        bottom:140px;
-    }}
-
-    to {{
-        bottom:{top_position};
-    }}
+    background:black;
 }}
 
 .stars {{
@@ -117,10 +89,44 @@ body {{
     height:100%;
     background-image:
         radial-gradient(white 1px, transparent 1px);
-    background-size:50px 50px;
+    background-size:60px 60px;
 }}
 
-.text {{
+.earth {{
+    position:absolute;
+    bottom:-300px;
+    left:50%;
+    transform:translateX(-50%);
+    width:700px;
+    height:700px;
+    border-radius:50%;
+
+    background:
+        radial-gradient(circle at 30% 30%, #4caf50, #1565c0);
+}}
+
+.ball {{
+    position:absolute;
+    bottom:170px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:60px;
+
+    animation: launch {animation_speed}s linear forwards;
+}}
+
+@keyframes launch {{
+
+    from {{
+        bottom:170px;
+    }}
+
+    to {{
+        bottom:{final_position};
+    }}
+}}
+
+.label {{
     position:absolute;
     top:20px;
     left:20px;
@@ -139,8 +145,8 @@ body {{
 
     <div class="stars"></div>
 
-    <div class="text">
-        Escape Velocity = 11.2 km/s
+    <div class="label">
+        🌍 Earth Escape Velocity = 11.2 km/s
     </div>
 
     <div class="earth"></div>
@@ -157,7 +163,7 @@ body {{
 # --------------------------------
 # SHOW COMPONENT
 # --------------------------------
-components.html(html_code, height=520)
+components.html(html_code, height=620)
 
 # --------------------------------
 # EXPLANATION
@@ -165,18 +171,17 @@ components.html(html_code, height=520)
 st.write("## Explanation")
 
 st.write(f"""
-- Ball Mass = {mass} kg
-- Launch Velocity = {velocity} km/s
-- Earth Escape Velocity = 11.2 km/s
+### Current Velocity
+{velocity} km/s
 
-### Physics Logic
+### Physics Behaviour
 
-If:
-- Velocity < 11.2 km/s  
-→ gravity ball ko wapas kheench legi
+If velocity:
+- less than 11.2 km/s
+→ ball upar jayegi phir gravity niche kheench legi
 
-If:
-- Velocity ≥ 11.2 km/s  
+If velocity:
+- greater than or equal to 11.2 km/s
 → ball Earth gravity se escape kar jayegi
 """)
 
@@ -186,10 +191,10 @@ If:
 st.error("""
 SUPER-IMPORTANT:
 
-Escape Velocity does NOT depend on object mass.
-
-It depends on:
+Escape Velocity depends on:
+- Planet gravity
 - Planet mass
 - Planet radius
-- Gravity
+
+NOT on object mass.
 """)
